@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>滚动条</title>
+		<style type="text/css">
+			*{
+				padding: 0;
+				margin: 0;
+				list-style: none;
+			}
+			.box{
+				width: 800px;
+				height: 400px;
+				position: fixed;
+				top: 200px;
+				left: 50%;
+				margin-left: -400px;
+				border: 2px dashed gray;
+			}
+			.tul{
+				width: 780px;
+				position: absolute;
+				top: 0;
+				left: 0;
+				
+			}
+			.tul li{
+				width: 100%;
+				height: 50px;
+				text-align: center;
+				line-height: 50px;
+				text-indent: 4px;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.scrollBar{
+				width: 20px;
+				height: 400px;
+				position: absolute;
+				right: 0;
+				top: 0;
+				background: gainsboro;
+			}
+			.thumbBar{
+				width: 20px;
+				height: 40px;
+				background: brown;
+				position: absolute;
+				top: 0;
+				left: 0;
+				opacity: 0.4;
+			}
+			.downNow{
+				opacity: 1 !important;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="box">
+		 
+		</div>
+	</body>
+	<script type="text/javascript" src="js/scrollBar.js"></script>
+	<script type="text/javascript">
+		var box = document.getElementsByClassName("box")[0];
+		
+		function scrollFrame(obj,data){
+			//骨架
+			//创建文字ul
+			var html = makeTextFrame(data);
+			//创建控制条
+			    html+= makeScrollBar();
+			obj.innerHTML = html;
+			//事件集
+			eventAll(obj);
+		}
+		    //创建文字ul
+		    function makeTextFrame(data){
+		      var html = '<ul class="tul">';
+		          for(var i=0;i<data.length;i++){
+		          html+='<li>'+data[i].text+'</li>';	
+		          }
+		          html+='</ul>';
+		          return html;
+		    	
+		    }
+			//创建控制条
+			function makeScrollBar(){
+				var html = ' <ul class="scrollBar">'+
+		  	               '<li class="thumbBar"></li>'+
+		                   '</ul>';
+				    return html;
+				
+			}
+			//事件集
+		    function eventAll(obj){
+		    var tul = obj.children[0];
+		    var scrollBar = obj.children[1];
+		    var thumbBar = scrollBar.children[0];
+		    
+		    window.addEventListener('click',function(e){
+		    	e.preventDefault();
+		    })
+		    window.getSelection?window.getSelection().removeAllRanges():document.selection.empty();
+		    window.addEventListener('mousedown',function(e){
+		    	e.preventDefault();
+		    	thumbBar.isMove = true;
+		    	thumbBar.classList.add("downNow");
+		    	var y = e.clientY - obj.offsetTop;
+		    	console.log(y);
+		    	
+		    })
+		    window.addEventListener('mouseup',function(e){
+		    	e.preventDefault();
+		    	thumbBar.isMove = false;
+		    	thumbBar.classList.remove("downNow");
+		    	
+		    })
+		    thumbBar.addEventListener('mousemove',function(e){
+		    	e.preventDefault();
+		    	
+		    	if(thumbBar.isMove){
+		    		var y = e.clientY - obj.offsetTop - scrollBar.offsetTop - thumbBar.offsetHeight/2;
+		    	    console.log(y);
+		    		thumbBarMove(y)
+		    	}
+		    	
+		    })	
+		    function thumbBarMove(y){
+				if(y<0){
+					y = 0;
+				}else if(y>scrollBar.offsetHeight - thumbBar.offsetHeight){
+					
+					y = scrollBar.offsetHeight - thumbBar.offsetHeight;
+					
+				}
+				thumbBar.style.top = Math.abs(y) + "px";
+				var ratio = y/(scrollBar.offsetHeight - thumbBar.offsetHeight);
+				var nuly = -(tul.offsetHeight - obj.offsetHeight)*ratio;
+				buffer(tul,nuly);
+				
+			}
+		    function buffer(obj,target){
+		    	clearInterval(obj.timer);
+		    	obj.timer = setInterval(function(){
+		    		var sp = (target - obj.offsetTop)/10;
+		    		    sp = sp>0?Math.ceil(sp):Math.floor(sp);
+		    		    obj.style.top = obj.offsetTop + sp + "px";
+		    		if(obj.offsetTop == target){
+		    			clearInterval(obj.timer);
+		    			return
+		    		}
+		    	},20)
+		    }
+		    
+		    }
+		    
+		scrollFrame(box,liDataList)
+		
+		
+	</script>
+</html>
